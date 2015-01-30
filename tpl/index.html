@@ -1,0 +1,124 @@
+<div class="container">
+    <div class="masthead">
+        <h3 class="muted" id="#logo" data-toggle="tooltip" data-placement="right" title="Now with iOS 8 support"><span class="label label-info">UDID</span> Grabber</h3>
+    </div>
+    <hr>
+    {{#message}}
+    <div class="alert alert-info alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        {{& message }}
+    </div>
+    {{/message}}
+        {{#ios}}
+            {{#udid}}
+                {{#callback}}
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">UDID access request</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p>A third party is requesting access to your UDID.</p>
+                            <div class="btn-group" role="group" aria-label="...">
+                                <a href="{{callback}}?udid={{udid}}" class="btn btn-success">Authorize</a>
+                                <a href="{{callback}}?udidreqfailed" class="btn btn-warning">Reject</a>
+                            </div>
+                        </div>
+                    </div>
+                {{/callback}}
+                <div class="jumbotron">
+                    <h1>Your UDID...</h1>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <span class="lead">{{udid}}</span>
+                            <div class="btn-group pull-right">
+                                <a class="btn btn-danger" id="clear-btn">Clear Data</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    $("#clear-btn").on('click', function(){
+                        $(".container").hide();
+                        $(".loader").show();
+                        $.get( "/remove", function( data ) {
+                            location.reload();
+                        })
+                    });
+                </script>
+            {{/udid}}
+            {{^udid}}
+                <div class="jumbotron">
+                    <h1>Get your iOS UDID...</h1>
+                    <p class="lead">Do you need to find your iOS device's UDID? UDID Grabber allows you to quickly and securely get your UDID. We use 256 bit encryption when storing the UDID in your browser and in the URL. We also host an awesome <a href="/api">API</a> for developers.</p>
+                    <br/>
+                    <a class="btn btn-lg btn-info" id="start-btn">Start UDID Grab</a>
+                </div>
+                <iframe src id="load-frame" style="display: none"></iframe>
+                <script>
+                    $("#start-btn").on('click', function(){
+                        $(".container").hide();
+                        var opts = {
+                            lines: 13, // The number of lines to draw
+                            length: 20, // The length of each line
+                            width: 10, // The line thickness
+                            radius: 30, // The radius of the inner circle
+                            corners: 1, // Corner roundness (0..1)
+                            rotate: 0, // The rotation offset
+                            direction: 1, // 1: clockwise, -1: counterclockwise
+                            color: '#ffffff', // #rgb or #rrggbb or array of colors
+                            speed: 1, // Rounds per second
+                            trail: 60, // Afterglow percentage
+                            shadow: false, // Whether to render a shadow
+                            hwaccel: false, // Whether to use hardware acceleration
+                            className: 'spinner', // The CSS class to assign to the spinner
+                            zIndex: 2e9, // The z-index (defaults to 2000000000)
+                            top: '50%', // Top position relative to parent
+                            left: '50%' // Left position relative to parent
+                        };
+                        var target = document.getElementById('spinner');
+                        var spinner = new Spinner(opts).spin(target);
+                        $('#load-frame').attr('src', 'http://udid.falkirks.com/grab');
+                        performFetch();
+                    });
+                    var tick = 0;
+                    function performFetch(){
+                        $.get( "/query", function( data ) {
+                            if(data == "true"){
+                                location.reload();
+                            }
+                            else{
+                                tick++;
+                                if(tick < 10){
+                                    setTimeout(function(){
+                                        performFetch();
+                                    }, 2000);
+                                }
+                                else{
+                                    $("#spinner").hide();
+                                    $(".jumbotron").html('<div class="panel panel-danger"><div class="panel-heading"><h3 class="panel-title">Request Timeout</h3></div><div class="panel-body">Your request has timed out. Did you click "cancel"? If not this is likely an issue with your internet connectivity. If you are running iOS 8 try reloading the page.</div></div>');
+                                    $(".container").fadeIn();
+
+                                }
+                            }
+                        });
+                    }
+                    if(window.location.href.search("auto") != -1){
+                        $("#start-btn").click();
+                    }
+                </script>
+            {{/udid}}
+        {{/ios}}
+        {{^ios}}
+            <div class="jumbotron">
+                <h1>Get your iOS UDID...</h1>
+                <p class="lead">Do you need to find your iOS device's UDID? UDID Grabber allows you to quickly and securely get your UDID. 256 bit encryption is used when storing the UDID in your browser and in the URL. In addition to this we support iOS 8 and offer a cool API (docs aren't done).</p>
+                <br/>
+                <button type="button" class="btn btn-lg btn-info" id="start-btn" data-toggle="popover" title="Not Supported" data-content="This tool only supports iOS devices. Please visit this page again from an iOS device.">Start UDID Grab</button>
+            </div>
+            <script>$('#start-btn').popover({trigger: "hover"})</script>
+        {{/ios}}
+    <hr>
+    <div class="footer">
+        <p>© Falkirks 2014</p> <br/>
+    </div>
+</div>

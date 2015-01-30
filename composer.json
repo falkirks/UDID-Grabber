@@ -1,0 +1,11 @@
+{
+    "name": "falkirks/udid",
+    "description": "Get all the UDIDs",
+    "license": "proprietary",
+    "require": {
+        "mustache/mustache": "1.0.0"
+    },
+    "autoload": {
+        "psr-4": {"udidgrabber\\": "src/"}
+    }
+}
